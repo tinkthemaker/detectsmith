@@ -1,0 +1,22 @@
+title: Rundll32 JavaScript Execution
+id: ds-win-0003
+status: test
+description: Detects rundll32 invoking JavaScript-related handlers, which can indicate proxy execution through trusted Windows binaries.
+references:
+  - https://attack.mitre.org/techniques/T1218/011/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: \rundll32.exe
+    CommandLine|contains: "javascript:"
+  condition: selection
+falsepositives:
+  - Some legacy troubleshooting scripts may invoke rundll32 with script handlers.
+level: high
+tags:
+  - attack.defense-evasion
+  - attack.t1218.011

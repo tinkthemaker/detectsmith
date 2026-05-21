@@ -1,0 +1,22 @@
+title: IAM Access Key Created
+id: ds-aws-0002
+status: test
+description: Detects IAM access key creation, which should be reviewed when performed for privileged users or outside expected workflows.
+references:
+  - https://attack.mitre.org/techniques/T1098/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: aws
+  service: iam
+  category: cloudtrail
+detection:
+  selection:
+    eventName: CreateAccessKey
+  condition: selection
+falsepositives:
+  - Administrators may create access keys for service accounts during approved provisioning.
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1098

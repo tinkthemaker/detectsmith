@@ -1,0 +1,21 @@
+title: Curl Piped To Shell
+id: ds-linux-0001
+status: test
+description: Detects curl output piped directly into a shell, a risky execution pattern often used by installers and occasionally by intrusions.
+references:
+  - https://attack.mitre.org/techniques/T1059/004/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains: "| sh"
+  condition: selection
+falsepositives:
+  - Some installation instructions use curl piped to shell; review source domain and user context.
+level: medium
+tags:
+  - attack.execution
+  - attack.t1059.004

@@ -1,0 +1,1 @@
+{"eventName": "AuthorizeSecurityGroupIngress", "requestParameters": "cidrIp=10.0.0.0/8 fromPort=22"}

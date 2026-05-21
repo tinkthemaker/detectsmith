@@ -1,0 +1,22 @@
+title: M365 OAuth Application Consent Grant
+id: ds-m365-0002
+status: test
+description: Detects OAuth application consent activity, which should be reviewed for suspicious scopes or unexpected publishers.
+references:
+  - https://attack.mitre.org/techniques/T1528/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: m365
+  service: entra-id
+  category: audit
+detection:
+  selection:
+    Operation: Consent to application
+  condition: selection
+falsepositives:
+  - Administrators may approve new enterprise applications as part of sanctioned SaaS onboarding.
+level: medium
+tags:
+  - attack.credential-access
+  - attack.t1528

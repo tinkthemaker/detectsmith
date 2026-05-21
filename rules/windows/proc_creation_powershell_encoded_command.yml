@@ -1,0 +1,22 @@
+title: PowerShell Encoded Command
+id: ds-win-0001
+status: test
+description: Detects PowerShell process creation with encoded command arguments, a common execution pattern that can hide command content from casual review.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: \powershell.exe
+    CommandLine|contains: " -enc "
+  condition: selection
+falsepositives:
+  - Administrative automation or software deployment scripts may use encoded commands.
+level: medium
+tags:
+  - attack.execution
+  - attack.t1059.001

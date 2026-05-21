@@ -1,0 +1,22 @@
+title: CloudTrail Logging Disabled
+id: ds-aws-0001
+status: test
+description: Detects CloudTrail API calls that stop logging, which may indicate an attempt to impair cloud audit visibility.
+references:
+  - https://attack.mitre.org/techniques/T1562/008/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: aws
+  service: cloudtrail
+  category: cloudtrail
+detection:
+  selection:
+    eventName: StopLogging
+  condition: selection
+falsepositives:
+  - Cloud administrators may stop trails during controlled maintenance or account restructuring.
+level: high
+tags:
+  - attack.defense-evasion
+  - attack.t1562.008

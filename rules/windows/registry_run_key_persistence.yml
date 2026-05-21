@@ -1,0 +1,21 @@
+title: Registry Run Key Persistence
+id: ds-win-0005
+status: test
+description: Detects writes to Windows Run keys, which can configure programs to execute at user logon.
+references:
+  - https://attack.mitre.org/techniques/T1060/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: windows
+  category: registry_set
+detection:
+  selection:
+    TargetObject|contains: \CurrentVersion\Run
+  condition: selection
+falsepositives:
+  - Legitimate applications may add startup entries during installation or updates.
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1060

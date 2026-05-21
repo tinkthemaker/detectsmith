@@ -1,0 +1,22 @@
+title: Scheduled Task Creation
+id: ds-win-0004
+status: test
+description: Detects schtasks creating a scheduled task, a common persistence mechanism when paired with suspicious command context.
+references:
+  - https://attack.mitre.org/techniques/T1053/005/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: \schtasks.exe
+    CommandLine|contains: " /create "
+  condition: selection
+falsepositives:
+  - Software installers and administrators legitimately create scheduled tasks.
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1053.005

@@ -1,0 +1,35 @@
+name: Detection CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Detectsmith
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run unit tests
+        run: python -m pytest -q
+
+      - name: Lint detection rules
+        run: detectsmith lint rules/ --format json --output reports/lint.json
+
+      - name: Run detection regression tests
+        run: detectsmith test tests/expected.yml --format json --output reports/test_results.json
+
+      - name: Generate ATT&CK coverage report
+        run: detectsmith coverage rules/ --format json --output reports/attack_coverage.json
+
+      - name: Generate rule documentation
+        run: detectsmith docs rules/ --out site/ --format json --output reports/docs.json

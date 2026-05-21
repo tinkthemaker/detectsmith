@@ -1,0 +1,22 @@
+title: Regsvr32 Scriptlet Execution
+id: ds-win-0002
+status: test
+description: Detects regsvr32 loading a scriptlet through scrobj.dll, a known signed-binary proxy execution pattern.
+references:
+  - https://attack.mitre.org/techniques/T1218/010/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: \regsvr32.exe
+    CommandLine|contains: scrobj.dll
+  condition: selection
+falsepositives:
+  - Rare legacy administration workflows may register scriptlet components.
+level: high
+tags:
+  - attack.defense-evasion
+  - attack.t1218.010

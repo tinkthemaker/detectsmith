@@ -1,0 +1,23 @@
+title: Security Group Opened To World
+id: ds-aws-0003
+status: test
+description: Detects security group ingress authorization containing 0.0.0.0/0, which may expose services publicly.
+references:
+  - https://attack.mitre.org/techniques/T1578/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: aws
+  service: ec2
+  category: cloudtrail
+detection:
+  selection:
+    eventName: AuthorizeSecurityGroupIngress
+    requestParameters|contains: 0.0.0.0/0
+  condition: selection
+falsepositives:
+  - Public-facing services may intentionally allow limited ingress from the internet.
+level: medium
+tags:
+  - attack.defense-evasion
+  - attack.t1578

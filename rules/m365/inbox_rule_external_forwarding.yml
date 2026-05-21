@@ -1,0 +1,23 @@
+title: M365 Inbox Rule External Forwarding
+id: ds-m365-0001
+status: test
+description: Detects inbox rule creation or modification with forwarding behavior, which can indicate email collection or persistence.
+references:
+  - https://attack.mitre.org/techniques/T1114/003/
+author: Detectsmith
+date: 2026/05/21
+logsource:
+  product: m365
+  service: exchange
+  category: audit
+detection:
+  selection:
+    Operation|contains: InboxRule
+    Parameters|contains: ForwardTo
+  condition: selection
+falsepositives:
+  - Users or helpdesk staff may configure approved forwarding rules for business workflows.
+level: high
+tags:
+  - attack.collection
+  - attack.t1114.003

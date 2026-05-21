@@ -1,0 +1,97 @@
+tests:
+  - name: powershell_encoded_positive
+    rule: rules/windows/proc_creation_powershell_encoded_command.yml
+    fixture: tests/fixtures/powershell_encoded_positive.jsonl
+    should_match: true
+  - name: powershell_encoded_negative
+    rule: rules/windows/proc_creation_powershell_encoded_command.yml
+    fixture: tests/fixtures/powershell_encoded_negative.jsonl
+    should_match: false
+  - name: regsvr32_scriptlet_positive
+    rule: rules/windows/proc_creation_regsvr32_scriptlet.yml
+    fixture: tests/fixtures/regsvr32_scriptlet_positive.jsonl
+    should_match: true
+  - name: regsvr32_scriptlet_negative
+    rule: rules/windows/proc_creation_regsvr32_scriptlet.yml
+    fixture: tests/fixtures/regsvr32_scriptlet_negative.jsonl
+    should_match: false
+  - name: rundll32_javascript_positive
+    rule: rules/windows/proc_creation_rundll32_javascript.yml
+    fixture: tests/fixtures/rundll32_javascript_positive.jsonl
+    should_match: true
+  - name: rundll32_javascript_negative
+    rule: rules/windows/proc_creation_rundll32_javascript.yml
+    fixture: tests/fixtures/rundll32_javascript_negative.jsonl
+    should_match: false
+  - name: schtasks_create_positive
+    rule: rules/windows/proc_creation_schtasks_persistence.yml
+    fixture: tests/fixtures/schtasks_create_positive.jsonl
+    should_match: true
+  - name: schtasks_create_negative
+    rule: rules/windows/proc_creation_schtasks_persistence.yml
+    fixture: tests/fixtures/schtasks_create_negative.jsonl
+    should_match: false
+  - name: run_key_positive
+    rule: rules/windows/registry_run_key_persistence.yml
+    fixture: tests/fixtures/run_key_positive.jsonl
+    should_match: true
+  - name: run_key_negative
+    rule: rules/windows/registry_run_key_persistence.yml
+    fixture: tests/fixtures/run_key_negative.jsonl
+    should_match: false
+  - name: curl_pipe_shell_positive
+    rule: rules/linux/proc_creation_curl_pipe_shell.yml
+    fixture: tests/fixtures/curl_pipe_shell_positive.jsonl
+    should_match: true
+  - name: curl_pipe_shell_negative
+    rule: rules/linux/proc_creation_curl_pipe_shell.yml
+    fixture: tests/fixtures/curl_pipe_shell_negative.jsonl
+    should_match: false
+  - name: reverse_shell_positive
+    rule: rules/linux/proc_creation_reverse_shell.yml
+    fixture: tests/fixtures/reverse_shell_positive.jsonl
+    should_match: true
+  - name: reverse_shell_negative
+    rule: rules/linux/proc_creation_reverse_shell.yml
+    fixture: tests/fixtures/reverse_shell_negative.jsonl
+    should_match: false
+  - name: cloudtrail_stop_positive
+    rule: rules/cloud/aws/cloudtrail_disable_logging.yml
+    fixture: tests/fixtures/cloudtrail_stop_positive.jsonl
+    should_match: true
+  - name: cloudtrail_stop_negative
+    rule: rules/cloud/aws/cloudtrail_disable_logging.yml
+    fixture: tests/fixtures/cloudtrail_stop_negative.jsonl
+    should_match: false
+  - name: iam_key_positive
+    rule: rules/cloud/aws/iam_access_key_created_for_privileged_user.yml
+    fixture: tests/fixtures/iam_key_positive.jsonl
+    should_match: true
+  - name: iam_key_negative
+    rule: rules/cloud/aws/iam_access_key_created_for_privileged_user.yml
+    fixture: tests/fixtures/iam_key_negative.jsonl
+    should_match: false
+  - name: sg_world_positive
+    rule: rules/cloud/aws/security_group_open_to_world.yml
+    fixture: tests/fixtures/sg_world_positive.jsonl
+    should_match: true
+  - name: sg_world_negative
+    rule: rules/cloud/aws/security_group_open_to_world.yml
+    fixture: tests/fixtures/sg_world_negative.jsonl
+    should_match: false
+  - name: inbox_forward_positive
+    rule: rules/m365/inbox_rule_external_forwarding.yml
+    fixture: tests/fixtures/inbox_forward_positive.jsonl
+    should_match: true
+  - name: inbox_forward_negative
+    rule: rules/m365/inbox_rule_external_forwarding.yml
+    fixture: tests/fixtures/inbox_forward_negative.jsonl
+    should_match: false
+  - name: oauth_consent_positive
+    rule: rules/m365/oauth_app_consent_grant.yml
+    fixture: tests/fixtures/oauth_consent_positive.jsonl
+    should_match: true
+  - name: oauth_consent_negative
+    rule: rules/m365/oauth_app_consent_grant.yml
+    fixture: tests/fixtures/oauth_consent_negative.jsonl
+    should_match: false

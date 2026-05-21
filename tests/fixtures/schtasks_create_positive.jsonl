@@ -1,0 +1,1 @@
+{"Image": "C:\\Windows\\System32\\schtasks.exe", "CommandLine": "schtasks.exe /create /tn updater /sc minute /tr calc.exe"}
