@@ -38,3 +38,11 @@ jobs:
 
       - name: Run full validation suite
         run: detectsmith validate run
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Build TUI binary
+        run: cd cmd/detectsmith-tui && go build -o detectsmith-tui.exe .
