@@ -43,6 +43,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "1.23"
+          cache-dependency-path: cmd/detectsmith-tui/go.sum
 
       - name: Build TUI binary
         run: cd cmd/detectsmith-tui && go build -o detectsmith-tui.exe .
