@@ -5,6 +5,7 @@ from typing import Optional
 
 import typer
 from rich.console import Console
+from rich.panel import Panel
 from rich.table import Table
 
 from detectsmith.docs import write_docs_site
@@ -13,9 +14,13 @@ from detectsmith.lint import lint_rules
 from detectsmith.reporting import docs_report_envelope, lint_report_envelope, test_report_envelope, write_json_report
 from detectsmith.rules import discover_rule_files, parse_rule_file
 from detectsmith.test_runner import run_expected_tests
+from detectsmith.validate_cmd import validate_app
 
 app = typer.Typer(help="Detection-as-code workbench for Sigma-style rules.")
 console = Console()
+
+# Register validate as a subcommand at the Typer level
+app.add_typer(validate_app, name="validate")
 
 
 @app.command()
@@ -23,12 +28,18 @@ def lint(
     rules_path: Path,
     output_format: str = typer.Option("text", "--format", help="Output format: text or json."),
     output: Optional[Path] = typer.Option(None, "--output", help="Optional report output path."),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show recommendations for each finding."),
 ) -> None:
     """Lint Sigma-style detection rules."""
     if output_format not in {"text", "json"}:
         raise typer.BadParameter("format must be 'text' or 'json'")
 
-    rules = [parse_rule_file(path) for path in discover_rule_files(rules_path)]
+    try:
+        rules = [parse_rule_file(path) for path in discover_rule_files(rules_path)]
+    except Exception as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(1)
+
     report = lint_rules(rules)
     has_errors = report.summary.findings_error > 0
     status = "completed_with_findings" if (has_errors or report.summary.findings_warn) else "success"
@@ -37,7 +48,7 @@ def lint(
         report_path = output or Path("reports/lint.json")
         write_json_report(lint_report_envelope(report, Path.cwd(), status), report_path)
 
-    _print_lint_report(report)
+    _print_lint_report(report, verbose=verbose)
 
     if has_errors:
         raise typer.Exit(1)
@@ -97,7 +108,7 @@ def docs(
     console.print(f"Wrote {result.rule_pages_written} rule pages to {result.output_dir}")
 
 
-def _print_lint_report(report) -> None:
+def _print_lint_report(report, *, verbose: bool = False) -> None:
     table = Table(title="Detectsmith lint")
     table.add_column("Rule")
     table.add_column("Score", justify="right")
@@ -110,6 +121,19 @@ def _print_lint_report(report) -> None:
         f"Rules: {report.summary.rules_total} | Errors: {report.summary.findings_error} | "
         f"Warnings: {report.summary.findings_warn} | Avg score: {report.summary.average_score}"
     )
+    if verbose:
+        _print_finding_recommendations(report)
+
+
+def _print_finding_recommendations(report) -> None:
+    console.print()
+    for result in report.rules:
+        if result.findings:
+            console.print(Panel(f"[bold]{result.path}[/bold]", expand=False))
+            for finding in result.findings:
+                icon = "![red]X[/red]" if finding.severity == "error" else "⚠" if finding.severity == "warn" else "ℹ"
+                console.print(f"  {icon} [yellow]{finding.check_id}[/yellow]: {finding.message}")
+                console.print(f"    → {finding.recommendation}")
 
 
 def _print_test_report(report) -> None:

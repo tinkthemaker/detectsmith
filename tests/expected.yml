@@ -95,3 +95,11 @@ tests:
     rule: rules/m365/oauth_app_consent_grant.yml
     fixture: tests/fixtures/oauth_consent_negative.jsonl
     should_match: false
+  - name: conn_internal_positive
+    rule: rules/cloud/aws/conn_to_internal_ip.yml
+    fixture: tests/fixtures/conn_to_internal_positive.jsonl
+    should_match: true
+  - name: conn_internal_negative
+    rule: rules/cloud/aws/conn_to_internal_ip.yml
+    fixture: tests/fixtures/conn_to_internal_negative.jsonl
+    should_match: false

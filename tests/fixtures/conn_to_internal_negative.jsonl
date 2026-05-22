@@ -1,0 +1,2 @@
+{"DstIp": "203.0.113.45", "SrcIp": "10.50.100.1", "Action": "ACCEPT", "Protocol": "TCP"}
+{"DstIp": "8.8.8.8", "SrcIp": "172.16.0.1", "Action": "ACCEPT", "Protocol": "UDP"}

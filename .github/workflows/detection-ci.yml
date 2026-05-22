@@ -35,3 +35,6 @@ jobs:
 
       - name: Generate rule documentation
         run: detectsmith docs rules/ --out site/ --format json --output reports/docs.json
+
+      - name: Run full validation suite
+        run: detectsmith validate run

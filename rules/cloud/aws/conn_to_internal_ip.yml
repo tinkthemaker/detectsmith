@@ -1,0 +1,24 @@
+title: Outbound Connection to Internal RFC 1918 IP
+id: detectsmith-test-cidr-001
+description: Detects outbound connections from the internet to private/internal IP ranges (RFC 1918) which should not be directly reachable from the internet.
+logsource:
+  product: aws
+  service: vpc_flow
+detection:
+  selection_internal:
+    DstIp|cidr: 10.0.0.0/8
+  selection_private:
+    DstIp|cidr: 192.168.0.0/16
+  selection_linklocal:
+    DstIp|cidr: 169.254.0.0/16
+  condition: 1 of selection_*
+level: medium
+status: experimental
+tags:
+  - attack.execution
+  - attack.t1490
+falsepositives:
+  - legitimate internal applications communicating over private IP ranges within a VPN tunnel
+references:
+  - https://attack.mitre.org/techniques/T1490/
+  - https://docs.aws.amazon.com/vpc/latest/userguide/VPC_and_Internet_Gateway.html
