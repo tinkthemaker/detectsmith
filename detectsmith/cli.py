@@ -10,6 +10,7 @@ from rich.table import Table
 
 from detectsmith.docs import write_docs_site
 from detectsmith.coverage import build_coverage_report, write_coverage_reports
+from detectsmith.gap_analyzer import cmd_gap, cmd_backlog
 from detectsmith.lint import lint_rules
 from detectsmith.reporting import docs_report_envelope, lint_report_envelope, test_report_envelope, write_json_report
 from detectsmith.rules import discover_rule_files, parse_rule_file
@@ -72,6 +73,27 @@ def test_rules(
     _print_test_report(report)
     if failed:
         raise typer.Exit(1)
+
+
+@app.command("gap")
+def gap_cmd(
+    scan_db: Path,
+    coverage: Optional[Path] = typer.Option(None, "--coverage", help="Path to Detectsmith attack_coverage.json."),
+) -> None:
+    """Analyze detection gaps against a SepulchrynScan report."""
+    code = cmd_gap(scan_db, coverage)
+    raise typer.Exit(code)
+
+
+@app.command("backlog")
+def backlog_cmd(
+    scan_db: Path,
+    coverage: Optional[Path] = typer.Option(None, "--coverage"),
+    output: Optional[Path] = typer.Option(None, "--output"),
+) -> None:
+    """Generate detection backlog JSON from a SepulchrynScan report."""
+    code = cmd_backlog(scan_db, coverage, output)
+    raise typer.Exit(code)
 
 
 @app.command()
