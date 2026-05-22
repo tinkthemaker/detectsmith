@@ -1,238 +1,147 @@
 package main
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// findDetectsmith searches common install paths for the detectsmith CLI.
-func findDetectsmith() (string, bool) {
-	paths := []string{
-		"detectsmith",
-		"detectsmith.exe",
-		filepath.Join(os.Getenv("LOCALAPPDATA"), "Programs", "Python", "Python314", "Scripts", "detectsmith.exe"),
-		filepath.Join(os.Getenv("APPDATA"), "Python", "Scripts", "detectsmith.exe"),
-		filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Python", "Python314", "Scripts", "detectsmith.exe"),
-	}
-	for _, p := range paths {
-		if _, err := os.Stat(p); err == nil {
-			return p, true
-		}
-	}
-	if bin, err := exec.LookPath("detectsmith"); err == nil {
-		return bin, true
-	}
-	return "", false
+// msg types
+type tickMsg struct{}
+
+type runCmdMsg struct {
+	tool string
+	args []string
+	desc string
 }
 
-// NewModel builds the initial TUI model.
-func NewModel() *Model {
-	bin, ok := findDetectsmith()
-	m := &Model{
-		cliAvailable:   ok,
-		detectsmithBin: bin,
-	}
-	m.spinner = spinner.New(spinner.WithSpinner(spinner.Dot))
-	return m
+type cmdResultMsg struct {
+	tool   string
+	stdout string
+	stderr string
+	err    error
 }
 
-// Msg types for command execution.
-type cmdOutputMsg struct {
-	cmd    string
-	output []byte
+type setScreenMsg struct {
+	s screen
 }
 
-type cmdErrorMsg struct {
-	cmd string
-	err string
-}
-
-// Init is tea.Model initialization.
-func (m *Model) Init() tea.Cmd {
-	bin, ok := findDetectsmith()
-	m.detectsmithBin = bin
-	m.cliAvailable = ok
-	if !ok {
-		m.loadError = "detectsmith CLI not found. Run 'pip install -e .' from the detectsmith project root, then restart the TUI."
-	}
-	return nil
-}
-
-// runDetectsmith shells out to detectsmith and returns stdout as a tea.Msg.
-func runDetectsmith(cmdName string, args ...string) tea.Cmd {
-	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-		defer cancel()
-
-		bin, ok := findDetectsmith()
-		if !ok {
-			return cmdErrorMsg{cmd: cmdName, err: "detectsmith binary not found"}
-		}
-
-		c := exec.CommandContext(ctx, bin, args...)
-		out, err := c.Output()
-		if err != nil {
-			return cmdErrorMsg{cmd: cmdName, err: err.Error()}
-		}
-		return cmdOutputMsg{cmd: cmdName, output: out}
-	}
-}
-
-func runLint() tea.Cmd {
-	return runDetectsmith("lint", "lint", "rules/", "--format", "json", "--output", "reports/lint.json")
-}
-
-func runTest() tea.Cmd {
-	return runDetectsmith("test", "test", "tests/expected.yml", "--format", "json", "--output", "reports/test_results.json")
-}
-
-func runCoverage() tea.Cmd {
-	return runDetectsmith("coverage", "coverage", "rules/", "--format", "json", "--output", "reports/attack_coverage.json")
-}
-
-func runDocs() tea.Cmd {
-	return runDetectsmith("docs", "docs", "rules/", "--out", "site/", "--format", "json", "--output", "reports/docs.json")
-}
-
-func runValidate() tea.Cmd {
-	return runDetectsmith("validate", "run")
-}
-
-// Update is tea.Model update handler.
+// Update is the tea.Model Update function.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c":
-			return m, tea.Quit
-
-		case "1":
-			m.currentScreen = screenDashboard
-		case "2":
-			m.currentScreen = screenRules
-		case "3":
-			m.currentScreen = screenTests
-		case "4":
-			m.currentScreen = screenCoverage
-		case "5":
-			m.currentScreen = screenDocs
-
-		case "l":
-			if !m.commandRunning && m.cliAvailable {
-				m.commandRunning = true
-				m.currentCmd = "lint"
-				return m, runLint()
-			}
-		case "t":
-			if !m.commandRunning && m.cliAvailable {
-				m.commandRunning = true
-				m.currentCmd = "test"
-				return m, runTest()
-			}
-		case "c":
-			if !m.commandRunning && m.cliAvailable {
-				m.commandRunning = true
-				m.currentCmd = "coverage"
-				return m, runCoverage()
-			}
-		case "d":
-			if !m.commandRunning && m.cliAvailable {
-				m.commandRunning = true
-				m.currentCmd = "docs"
-				return m, runDocs()
-			}
-		case "a":
-			if !m.commandRunning && m.cliAvailable {
-				m.commandRunning = true
-				m.currentCmd = "validate"
-				return m, runValidate()
-			}
-
-		case "up", "k":
-			switch m.currentScreen {
-			case screenRules:
-				if m.selectedRule > 0 {
-					m.selectedRule--
-				}
-			case screenTests:
-				if m.testsCursor > 0 {
-					m.testsCursor--
-				}
-			}
-		case "down", "j":
-			switch m.currentScreen {
-			case screenRules:
-				if m.lintReport != nil && m.selectedRule < len(m.lintReport.Rules)-1 {
-					m.selectedRule++
-				}
-			case screenTests:
-				if m.testReport != nil && m.testsCursor < len(m.testReport.Tests)-1 {
-					m.testsCursor++
-				}
-			}
-
-		case "enter":
-			if m.currentScreen == screenDashboard && m.lintReport != nil && len(m.lintReport.Rules) > 0 {
-				m.currentScreen = screenRules
-			}
-		}
-
+		return m.handleKey(msg)
 	case spinner.TickMsg:
-		s, cmd := m.spinner.Update(msg)
-		m.spinner = s
+		newSpinner, cmd := m.spinner.Update(msg)
+		m.spinner = newSpinner
 		return m, cmd
-
-	case cmdOutputMsg:
-		m.commandRunning = false
-		m.lastCommand = msg.cmd
-		m.lastError = ""
-		switch msg.cmd {
-		case "lint":
-			var r LintReport
-			if err := json.Unmarshal(msg.output, &r); err != nil {
-				m.lastError = fmt.Sprintf("parse error: %v", err)
-			} else {
-				m.lintReport = &r
-			}
-		case "test":
-			var r TestReport
-			if err := json.Unmarshal(msg.output, &r); err != nil {
-				m.lastError = fmt.Sprintf("parse error: %v", err)
-			} else {
-				m.testReport = &r
-			}
-		case "coverage":
-			var r CoverageReport
-			if err := json.Unmarshal(msg.output, &r); err != nil {
-				m.lastError = fmt.Sprintf("parse error: %v", err)
-			} else {
-				m.coverageReport = &r
-			}
-		case "docs":
-			var r DocsReport
-			if err := json.Unmarshal(msg.output, &r); err != nil {
-				m.lastError = fmt.Sprintf("parse error: %v", err)
-			} else {
-				m.docsResult = &r
-			}
-		}
+	case setScreenMsg:
+		m.currentScreen = msg.s
 		return m, nil
-
-	case cmdErrorMsg:
-		m.commandRunning = false
-		m.lastCommand = msg.cmd
-		m.lastError = msg.err
-		return m, nil
+	case runCmdMsg:
+		return m, m.runCommand(msg.tool, msg.args, msg.desc)
+	case cmdResultMsg:
+		return m.handleCmdResult(msg)
 	}
-
 	return m, nil
+}
+
+func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	key := msg.String()
+	switch key {
+	case "q", "Q":
+		return m, tea.Quit
+	case "1": m.currentScreen = screenDashboard
+	case "2": m.currentScreen = screenSepulchrynScan
+	case "3": m.currentScreen = screenDetectsmith
+	case "4": m.currentScreen = screenPipeline
+	case "5": m.currentScreen = screenSettings
+	case "s", "S":
+		if m.currentScreen == screenSepulchrynScan && m.sepulchrynState.currentTarget != "" {
+			return m, m.runCommand("sepulchrynscan", []string{"scan", m.sepulchrynState.currentTarget}, "sepulchrynscan scan")
+		}
+	case "l", "L":
+		if m.currentScreen == screenDetectsmith {
+			return m, m.runCommand("detectsmith", []string{"lint", "rules/"}, "detectsmith lint")
+		}
+	case "t", "T":
+		if m.currentScreen == screenDetectsmith {
+			return m, m.runCommand("detectsmith", []string{"test", "tests/expected.yml"}, "detectsmith test")
+		}
+	case "c", "C":
+		if m.currentScreen == screenDetectsmith {
+			return m, m.runCommand("detectsmith", []string{"coverage", "rules/", "--format", "json", "--output", "reports/attack_coverage.json"}, "detectsmith coverage")
+		}
+	case "g", "G":
+		if m.currentScreen == screenDetectsmith {
+			return m, m.runCommand("detectsmith", []string{"gap", "tools/sepulchrynscan/data/sepulchryn.db", "--coverage", "reports/attack_coverage.json"}, "detectsmith gap")
+		}
+	case "p", "P":
+		if m.currentScreen == screenPipeline {
+			return m, m.runCommand("detectsmith", []string{"gap", "tools/sepulchrynscan/data/sepulchryn.db", "--coverage", "reports/attack_coverage.json"}, "pipeline: gap analysis")
+		}
+	}
+	return m, nil
+}
+
+func (m *Model) handleCmdResult(msg cmdResultMsg) (tea.Model, tea.Cmd) {
+	m.commandRunning = false
+	if msg.err != nil {
+		m.lastError = msg.err.Error()
+		m.outputBuffer = msg.stderr
+	} else {
+		m.lastError = ""
+		m.outputBuffer = msg.stdout
+		switch msg.tool {
+		case "sepulchrynscan":
+			m.sepulchrynState.lastOutput = msg.stdout
+		case "detectsmith":
+			m.detectsmithState.gapOutput = msg.stdout
+		}
+	}
+	return m, nil
+}
+
+func (m *Model) runCommand(tool string, args []string, desc string) tea.Cmd {
+	m.commandRunning = true
+	m.currentCmd = desc
+	m.lastError = ""
+
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+
+		python, _ := os.Executable()
+		if python == "" || strings.Contains(python, "hermes") {
+			python = "python"
+		}
+
+		var cmd *exec.Cmd
+		if tool == "sepulchrynscan" {
+			cmd = exec.CommandContext(ctx, python, append([]string{"-m", "sepulchrynscan.cli"}, args...)...)
+			cmd.Dir = filepath.Join(repoRoot(), "tools", "sepulchrynscan")
+		} else {
+			cmd = exec.CommandContext(ctx, python, append([]string{"-m", "detectsmith.cli"}, args...)...)
+			cmd.Dir = repoRoot()
+		}
+
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+		err := cmd.Run()
+
+		return cmdResultMsg{tool: tool, stdout: stdout.String(), stderr: stderr.String(), err: err}
+	}
+}
+
+func repoRoot() string {
+	cwd, _ := os.Getwd()
+	return cwd
 }

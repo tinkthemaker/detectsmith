@@ -39,59 +39,59 @@ var (
 // Style definitions
 var (
 	WindowStyle = lipgloss.NewStyle().
-			Foreground(ColorForeground).
-			Background(ColorBackground).
-			Padding(1, 2)
+		Foreground(ColorForeground).
+		Background(ColorBackground).
+		Padding(1, 2)
 
 	TitleStyle = lipgloss.NewStyle().
-			Foreground(ColorHeader).
-			Bold(true).
-			Padding(0, 1)
+		Foreground(ColorHeader).
+		Bold(true).
+		Padding(0, 1)
 
 	SubtitleStyle = lipgloss.NewStyle().
-			Foreground(ColorSubtle).
-			Padding(0, 1)
+		Foreground(ColorSubtle).
+		Padding(0, 1)
 
 	StatusSuccessStyle = lipgloss.NewStyle().
-				Foreground(ColorSuccess)
+			Foreground(ColorSuccess)
 
 	StatusWarningStyle = lipgloss.NewStyle().
-				Foreground(ColorWarning)
+			Foreground(ColorWarning)
 
 	StatusErrorStyle = lipgloss.NewStyle().
-			  Foreground(ColorError)
+		  Foreground(ColorError)
 
 	LabelStyle = lipgloss.NewStyle().
-		    Foreground(ColorSubtle)
+	    Foreground(ColorSubtle)
 
 	ValueStyle = lipgloss.NewStyle().
-		    Foreground(ColorForeground)
+	    Foreground(ColorForeground)
 
 	CardStyle = lipgloss.NewStyle().
-		    Foreground(ColorForeground).
-		    Background(lipgloss.Color("#21222C")).
-		    BorderStyle(lipgloss.Border{
-			Left: "│",
-			Right: "│",
-			Top: " ",
-			Bottom: " ",
-		}).
-		BorderForeground(ColorBorder).
-		Padding(1, 2).
-		MarginRight(1)
+	    Foreground(ColorForeground).
+	    Background(lipgloss.Color("#21222C")).
+	    BorderStyle(lipgloss.Border{
+		Left: "│",
+		Right: "│",
+		Top: " ",
+		Bottom: " ",
+	}).
+	BorderForeground(ColorBorder).
+	Padding(1, 2).
+	MarginRight(1)
 
 	CardActiveStyle = lipgloss.NewStyle().
-			  Foreground(ColorHeader).
-			  Background(lipgloss.Color("#1F3054")).
-			  BorderStyle(lipgloss.Border{
-			  	Left: "│",
-			  	Right: "│",
-			  	Top: " ",
-			  	Bottom: " ",
-			  }).
-			  BorderForeground(ColorInfo).
-			  Padding(1, 2).
-			  MarginRight(1)
+		  Foreground(ColorHeader).
+		  Background(lipgloss.Color("#1F3054")).
+		  BorderStyle(lipgloss.Border{
+		 	Left: "│",
+		 	Right: "│",
+		 	Top: " ",
+		 	Bottom: " ",
+		  }).
+		  BorderForeground(ColorInfo).
+		  Padding(1, 2).
+		  MarginRight(1)
 
 	TableHeaderStyle = lipgloss.NewStyle().
 			   Foreground(ColorSubtle).
@@ -103,4 +103,26 @@ var (
 	TableRowAltStyle = lipgloss.NewStyle().
 			   Background(lipgloss.Color("#161B22")).
 			   Foreground(ColorForeground)
+
+	// Common style aliases for TUI screens
+	StyleHeader = lipgloss.NewStyle().
+		      Foreground(ColorHeader).
+		      Bold(true)
+
+	StyleTitle = TitleStyle
+
+	StyleDim = lipgloss.NewStyle().
+		   Foreground(ColorSubtle)
+
+	StyleGood = lipgloss.NewStyle().
+		    Foreground(ColorSuccess)
+
+	StyleWarn = lipgloss.NewStyle().
+		    Foreground(ColorWarning)
+
+	StyleError = lipgloss.NewStyle().
+		     Foreground(ColorError)
+
+	StyleAccent = lipgloss.NewStyle().
+		      Foreground(ColorInfo)
 )
