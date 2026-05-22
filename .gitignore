@@ -18,3 +18,6 @@ reports/*.md
 site/*.md
 site/rules/
 !site/.gitkeep
+
+# Go binary
+cmd/detectsmith-tui/detectsmith-tui.exe
