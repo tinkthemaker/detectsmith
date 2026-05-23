@@ -1,5 +1,10 @@
 # Detectsmith
 
+[![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python)](https://python.org)
+[![Tests](https://img.shields.io/badge/tests-62%20passing-brightgreen)](https://github.com/tinkthemaker/detectsmith)
+[![Go](https://img.shields.io/badge/Go%20TUI-1.24+-00ADD8?logo=go)](https://go.dev)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Detection-as-code workbench for writing, testing, scoring, and documenting Sigma-style detections.
 
 ## Project status
